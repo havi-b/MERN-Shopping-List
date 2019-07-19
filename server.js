@@ -9,14 +9,28 @@ const app = express();
 // Bodyparser Middleware
 app.use(bodyParser.json());
 
-// DB Config
-const db = require('./config/keys').mongoURI;
+// Connecting to MongoDB
+mongoose.connect(
+    "mongodb://mongodb:27017/test",
+    { useNewUrlParser: true }
+);
 
-// Connect MongoDB
-mongoose
-    .connect(db, {useNewUrlParser: true})
-    .then(() => console.log('MongoBD Connected...'))
-    .catch(err => console.log(err))
+// If there is a connection error send an error message
+mongoose.connection.on("error", error => {
+    console.log("Database connection error:", error);
+    databaseConnection = "Error connecting to Database";
+});
+
+// If connected to MongoDB send a success message
+mongoose.connection.once("open", () => {
+    console.log("Connected to Database!");
+    databaseConnection = "Connected to Database";
+});
+
+// Test GET request
+app.get('/', (req, res) => {
+    res.json({ status: 'Backend Connected'});
+});
 
 // Use Routes
 app.use('/api/items', items);
